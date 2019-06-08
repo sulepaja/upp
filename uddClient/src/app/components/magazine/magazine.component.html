@@ -1,0 +1,29 @@
+
+<h2>Magazines:</h2>
+<br/>
+<div class="magazines">
+  <mat-accordion>
+    <mat-expansion-panel *ngFor="let magazine of magazines">
+        <mat-expansion-panel-header><b>{{magazine.name}}</b></mat-expansion-panel-header>
+
+        <mat-list>
+            <mat-list-item *ngFor="let paper of magazine.scientificPapers">
+                <div *ngIf="paper.approved">
+                    <a mat-line href="/paper" (click)='redirectPaper(paper)'>{{paper  .name}}</a>                
+                    <button *ngIf="userLogged && userMags.includes(magazine.id)" style="float: right;" (click)="download(paper)" mat-stroked-button>Download</button>
+                </div>
+            </mat-list-item>
+            <br/>
+            <button *ngIf="magazine.price!=0 && !userMags.includes(magazine.id)" mat-stroked-button (click) = "buyAccess(magazine)">Buy Access</button>
+            <button *ngIf="magazine.price==0 && !userMags.includes(magazine.id)" mat-stroked-button (click) = "buyAccess(magazine)">Unlock Access</button>
+            <p *ngIf="magazine.price!=0 && !userMags.includes(magazine.id)" style="margin-top:10px;">Price: {{magazine.price}}</p>
+            <p *ngIf="magazine.price==0 && !userMags.includes(magazine.id)"  style="margin-top:10px;">Price: Free</p>
+        </mat-list>
+    </mat-expansion-panel> 
+  </mat-accordion>
+</div>
+
+
+
+
+

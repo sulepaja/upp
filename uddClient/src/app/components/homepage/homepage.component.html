@@ -1,0 +1,51 @@
+<!-- <nav class="navbar navbar-expand-lg  navbar-dark bg-dark">
+    <ul class="navbar-nav mr-auto">
+        <a class="nav-link" href="#">Naucna Centrala
+          <span class="sr-only">(current)</span>
+        </a>
+    </ul>
+    <ul class="navbar-nav">
+
+        <li class="nav-item" *ngIf="userLogged" >
+            <a class="nav-link">
+            <span class="glyphicon glyphicon-log-in"></span>Loged as: {{loggedUser.username}}</a>
+        </li>
+
+        <li class="nav-item" *ngIf="!userLogged" >
+            <a class="nav-link" href="/login">
+            <span class="glyphicon glyphicon-log-in"></span>Login</a>
+        </li>
+
+        <li class="nav-item" *ngIf="!userLogged">
+            <a class="nav-link" href="/register">
+            <span class="glyphicon glyphicon-log-in"></span>Register</a>
+        </li>
+
+        <li class="nav-item" *ngIf="userLogged">
+            <a class="nav-link" href="/search">
+            <span class="glyphicon glyphicon-log-in"></span>Search</a>
+        </li>
+      <li class="nav-item" *ngIf="userLogged">
+        <a class="nav-link" href="/upload">
+          <span class="glyphicon glyphicon-log-in"></span>Upload</a>
+      </li>
+
+      <li class="nav-item" *ngIf="userLogged">
+      <a class="nav-link" href="" (click)='clickLogout()'>
+        <span class="glyphicon glyphicon-log-in"></span>Logout</a>
+    </li>
+    </ul>
+</nav> -->
+<!-- <a href="/register" class="btn btn-custom btn-lg page-scroll">REGISTER</a>
+<a href="/login" class="btn btn-custom btn-lg page-scroll" style="margin-left:10px; width:160px;">LOGIN</a>
+<a href="/upload" style="margin-left:10px; width:160px;">UPLOAD</a>
+<a href="/search" style="margin-left:10px; width:160px;">SEARCH</a> -->
+<app-header></app-header>
+
+<br/><br/><br/><br/><br/><br/>
+
+<div>
+    <app-magazine></app-magazine>
+</div>
+
+

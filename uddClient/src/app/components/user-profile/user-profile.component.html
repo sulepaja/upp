@@ -1,0 +1,73 @@
+<app-header></app-header>
+
+<div *ngIf="loggedUser.role=='EDITOR'">
+  <table>
+    <thead>
+      <tr>
+        <th>Paper Name</th>
+        <th>Author</th>
+        <th>Co-authors</th>
+        <th>Keywords</th>
+        <th>Scientific field</th>
+        <th>Download</th>
+        <th>Rework</th>
+        <th>Approve</th>
+        <th>Discard</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let paper of sciencePapersMainEditor">
+        <td>{{paper.name}}</td>
+        <td>{{paper.author.firstname}} {{paper.author.lastname}}</td>
+        <td>{{paper.co_authors}}</td>
+        <td>{{paper.keywords}}</td>
+        <td>{{paper.nameScientifiField}}</td>
+        <td><button (click)="download(paper)">Download</button></td>
+        <td><button (click)="openReworkCommentPopUp(paper)">Rework</button></td>
+        <td><button (click)="approve(paper)">Approve</button></td>
+        <td><button (click)="deletePaper(paper)">Discard</button></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="pop-up-style" *ngIf="showPopUpComment">
+    <div class="pop-up-inner">
+      <div class="pop-up-top">
+          <h5>Enter comment for author</h5>
+          <button (click)="togglePopUpVisibility()" class="x-button">X</button>
+      </div>
+      <div>
+        <textarea [(ngModel)]="commentValue"></textarea>
+      </div>
+      <div>
+        <button (click)="togglePopUpVisibility()">Cancel</button>
+        <button (click)="sendComment()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="loggedUser.role=='USER'">
+  <div>    
+    <div *ngFor="let paper of sciencePapersUser">
+      <h3>Paper name: {{paper.name}}</h3>
+      <p>Abstract: {{paper.abbstract}}</p>
+      <p>Messages:</p>
+      <div *ngFor="let message of paper.comments">
+        <p>{{message.content}}</p>
+      </div>
+      <div class="upload-btn-wrapper" style="margin-top:30px;">
+          <button class="btn">Upload</button>
+          <input type="file" (change)="selectFile($event)" name="myfile" />
+      </div>
+      <div>
+        <button (click)="uploadPaper(paper)">Submit</button>
+      </div>
+    </div>    
+  </div>
+</div>
+
+<div *ngIf="loggedUser.role=='SECEDITOR'">
+  <div *ngFor="let paper of secondEditorSiencePapers">
+    <p>AAAAAAAAAAAAAAAAAAAA USAO SAM</p>
+  </div>
+</div>

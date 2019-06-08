@@ -1,0 +1,99 @@
+<!-- <div class="formClass">
+  <form [formGroup]="formUpload" enctype="multipart/form-data" >
+    <br/>
+    <label>Title: </label>
+    <br/>
+     <input formControlName="name" type="text" class="form-control" name="name"  placeholder="title">
+    <br/> -->
+    <!--<div class="container-login100-form-btn">-->
+      <!--<button type="button" (click)="serachMagazineTitle(formTitleMagazine.value)" class="login100-form-btn"> Search </button>-->
+    <!--</div>-->
+
+    <!-- <br/>
+    <label>Keywords: </label>
+    <br/>
+    <input formControlName="keywords" type="text" class="form-control" name="keywords"  placeholder="Keywords">
+    <br/>
+    <br/>
+
+    <label>Abstract</label>
+    <br/>
+     <input formControlName="abbstract" type="text" class="form-control" name="abbstract"  placeholder="Abstract">
+    <br/>
+
+    <button class="btn btn-success"  [disabled]="!formUpload.valid" (click)="upload(formUpload.value)">Upload</button>
+  </form>
+</div> -->
+<app-header></app-header>
+
+<div class="limiter">
+  <div class="container-login100">
+    <div class="wrap-login100">
+      <form [formGroup]="formUpload" enctype="multipart/form-data" class="login100-form validate-form p-l-55 p-r-55 p-t-178">
+        <span class="login100-form-title">
+          Upload a science paper
+        </span>
+
+        <div class="wrap-input100 validate-input m-b-16">
+          <input class="input100" type="text" formControlName="name" name="name" placeholder="Title">
+          <span class="focus-input100"></span>
+        </div>
+
+        <div class="wrap-input100 validate-input m-b-16">
+          <input class="input100" type="text" formControlName="keywords" name="keywords" placeholder="Keywords">
+          <span class="focus-input100"></span>
+        </div>
+
+        <div class="wrap-input100 validate-input">
+          <textarea class="input100" type="text" formControlName="abbstract" name="abbstract" placeholder="Abstract"></textarea>
+          <span class="focus-input100"></span>
+        </div>        
+
+        <div class="wrap-input100 validate-input">
+          <select formControlName="selectedMagazine" name="selectedMagazine" style="margin-top:15px;" class="input100">
+            <option selected></option>
+            <option *ngFor="let magazine of magazines">{{magazine.name}}</option>            
+          </select>
+          <span class="focus-input100"></span>
+        </div>    
+        
+        <!-- <div class="wrap-input100 validate-input">
+          <select formControlName="selectedMagazine" name="selectedMagazine" style="margin-top:15px;" class="input100">
+            <option selected></option>
+            <option *ngFor="let magazine of magazines">{{magazine.name}}</option>            
+          </select>
+          <span class="focus-input100"></span>
+        </div>         -->
+
+        <!-- <div class="wrap-input100 validate-input">
+          <input type="file" (change)="selectFile($event)">
+        </div> -->
+
+        <div class="upload-btn-wrapper" style="margin-top:30px;">
+          <button class="btn">Upload a file</button>
+          <input type="file" (change)="selectFile($event)" name="myfile" />
+        </div>
+
+        <div class="flex-col-c p-t-170 p-b-40">
+          <!-- <span class="txt1 p-b-9">
+            Don’t have an account?
+          </span>
+
+          <a href="/register" class="txt3">
+            Sign up now
+          </a> -->
+          
+            <div *ngIf="currentFileUpload" class="progress-bar progress-bar-info progress-bar-striped" role="progressbar" attr.aria-valuenow="{{progress.percentage}}"
+              aria-valuemin="0" aria-valuemax="100" [ngStyle]="{width:progress.percentage+'%'}">
+              {{progress.percentage}}%
+            </div>
+          
+        </div>
+
+        <div class="container-login100-form-btn" style="margin-bottom: 30px;">
+          <button type="button" [disabled]="!formUpload.valid" (click)="upload(formUpload.value)" class="login100-form-btn"> Upload </button>
+        </div>        
+      </form>
+    </div>
+  </div>
+</div>

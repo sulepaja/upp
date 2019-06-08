@@ -1,0 +1,40 @@
+@font-face {
+    font-family: Ubuntu-Regular;
+    src: url('../../../assets/fonts/ubuntu/Ubuntu-Regular.ttf'); 
+  }
+  
+  @font-face {
+    font-family: Ubuntu-Bold;
+    src: url('../../../assets/fonts/ubuntu/Ubuntu-Bold.ttf'); 
+  }
+  
+  @font-face {
+    font-family: JosefinSans-Bold;
+    src: url('../../../assets/fonts/JosefinSans/JosefinSans-Bold.ttf'); 
+  }
+  
+  * {
+      margin: 0px; 
+      padding: 0px; 
+      box-sizing: border-box;
+  }
+  
+  body, html {
+      height: 100%;
+      font-family: Ubuntu-Regular, sans-serif;
+  }
+
+.magazines{
+    width:70%;
+    margin:0 auto;
+}
+
+h1{
+    margin-left:10px;
+    font-family: Ubuntu-Regular;
+}
+
+h2{
+    margin-left:10px;
+    font-family: Ubuntu-Regular;
+}
