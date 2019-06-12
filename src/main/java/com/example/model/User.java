@@ -67,9 +67,8 @@ public class User {
     private List<Magazine> allowedMagazines = new ArrayList<Magazine>();
 
     @Transient
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER) // BACA ERROR PRI STARTUP
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JsonIgnore
-	//@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Comment> comments = new ArrayList<Comment>();
 
 	@Transient
@@ -95,6 +94,10 @@ public class User {
 	)
 	private List<ScientificField> listScientificField= new ArrayList<ScientificField>();
 
+	@ManyToOne
+	@JsonIgnore
+	private Magazine reviewerMagazine;
+
 	public User(){}
 
 	public User(String username, String firstname, String lastname, String city, String country, String email, String password, String role) {
@@ -108,7 +111,13 @@ public class User {
 		this.role = role;
 	}
 
+	public Magazine getReviewerMagazine() {
+		return reviewerMagazine;
+	}
 
+	public void setReviewerMagazine(Magazine reviewerMagazine) {
+		this.reviewerMagazine = reviewerMagazine;
+	}
 
 	public List<Comment> getComments() {
 		return comments;

@@ -2,7 +2,6 @@ package com.example.camunda.javaDelegate;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,23 +9,24 @@ import java.util.HashMap;
 
 @Service
 @Transactional
-public class CheckTopicSciencePaperService implements JavaDelegate {
+public class MoreChangeOrAcceptService implements JavaDelegate {
 	//DiscardSciencePaperService
 //EditorFinalDecision
+	//MoreChangeOrAcceptService
 	@Override
 	public void execute(DelegateExecution execution) throws Exception {
 		@SuppressWarnings("unchecked")
 		HashMap<String, Object> sciencePaperData = (HashMap<String, Object>) execution.getVariable("sciencePaperData");
-		System.out.println("\n provera za Brisanje SERVICE");
+		System.out.println("\n MoreChangeOrAcceptService");
 
-		String flag = sciencePaperData.get("discard").toString();
+		String flag = sciencePaperData.get("moreChange").toString();
 		
 		if(flag.equals("yes")) {
-			execution.setVariable("discard", true);
-			System.out.println("\n Rad je odbijen");
+			execution.setVariable("moreChange", true);
+			System.out.println("\n Rad  jos dorada");
 		} else {
-			execution.setVariable("discard", false);
-			System.out.println("\nRad nije odbijen");
+			execution.setVariable("moreChange", false); // zavrsava proces
+			System.out.println("\nRad  ne treba vise dorada");
 		}
 	}
 

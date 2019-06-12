@@ -1,4 +1,5 @@
 package com.example.controller;
+import com.example.DTO.ReviewDataDTO;
 import com.example.DTO.StringDTO;
 import com.example.model.SciencePaper;
 import com.example.model.*;
@@ -79,7 +80,11 @@ public class SciencePaperController {
 
 		processInstance = runtimeService.startProcessInstanceByKey("rad"); // pokrecemo glavni proces
 		Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list().get(0);
-
+			HashMap<String, Object> users = new HashMap<String, Object>();
+			users.put("author", currentUser.getUsername());
+			users.put("editor", currentUser.getUsername());
+			users.put("secEditor", currentUser.getUsername());
+			users.put("reviewer", currentUser.getUsername());
 
 			Magazine magazine = magazineService.findById(id);
 			User user = currentUser.getUser();
@@ -108,9 +113,16 @@ public class SciencePaperController {
 			sciencePaperData.put("discard", "no");
 			sciencePaperData.put("goodFormatted", "yes");
 			sciencePaperData.put("updated", "no");
-			sciencePaperData.put("addMoreReviewer","yes");//dokle god ne stisne dugme potvrdi na dijalogu za dodavanje reviewra dotle ce ici u krug
+			sciencePaperData.put("addMoreReviewer","no");//dokle god ne stisne dugme potvrdi na dijalogu za dodavanje reviewra dotle ce ici u krug
 			sciencePaperData.put("commentId","0");
-            //
+			sciencePaperData.put("finalDecision","no");
+			sciencePaperData.put("smallChange","no");
+			sciencePaperData.put("bigChange","no");
+			sciencePaperData.put("moreChange","yes");// na samom kraju, ako se postavi na "no" nema vise dodavanja rada i on se objavljuje
+			sciencePaperData.put("lastDiscard","no");
+			sciencePaperData.put("secDiscard","no");
+
+			//
 
 			sciencePaperService.save(newSciencePaper);
 			storageService.store(sciencePaper.getTextPDF()[0]);
@@ -121,6 +133,7 @@ public class SciencePaperController {
 			sciencePaperData.put("sciencePaperId", newSciencePaper.getId());
 			String processInstanceId = task.getProcessInstanceId();
 			runtimeService.setVariable(processInstanceId, "sciencePaperData", sciencePaperData);
+			runtimeService.setVariable(processInstanceId, "users", users);
 			formService.submitTaskForm(task.getId(), sciencePaperData);
 			return ResponseEntity.status(HttpStatus.OK).body("Success!");
 		}else{
@@ -217,6 +230,8 @@ public class SciencePaperController {
 		SciencePaper sciencePaper = sciencePaperService.findById(Long.parseLong(paperId));
 		User user = currentUser.getUser();
 		Comment newComment = new Comment(user, sciencePaper, comment.getCommentValue());
+		newComment.setFinished(true);
+		newComment.setRecommendation("Reject");
 
 		System.out.println("\n badFormatted controller");
 		sciencePaper.getComments().add(newComment);
@@ -251,7 +266,13 @@ public class SciencePaperController {
 			storageService.delete(sciencePaper.getLocationOnDrive());
 			storageService.store(file);
 			sciencePaper.setLocationOnDrive(file.getOriginalFilename());
-			sciencePaper.setStatus("editor");
+
+			if(sciencePaper.getStatus().equals("small_mistake")){
+				System.out.println("\n Pronasao sam rad sa malom greskom i menjam status");// za prikaz editoru da donese odluku opet greska, gotovo ili odbija
+				sciencePaper.setStatus("small_mistake_resolve");
+			}else{
+				sciencePaper.setStatus("editor");
+			}
 			sciencePaperService.save(sciencePaper);
 
 			System.out.println("\n updatedSciencePaper controller");
@@ -277,7 +298,7 @@ public class SciencePaperController {
 
 		SciencePaper sciencePaper = sciencePaperService.findById(Long.parseLong(paperId));
 		sciencePaper.setStatus("sec_editor_rev");
-
+//SequenceFlow_0anqqk1    ostao SequenceFlow_1c8umfi
 //		System.out.println("PRE PETLJE");
 //		for(ScientificField field: userService.findByEmail("seditor1@editor.com").get().getListScientificField()){
 //			System.out.println("NAUCNO POLJE");
@@ -287,7 +308,7 @@ public class SciencePaperController {
 
 		int rnd = new Random().nextInt(field.getSecEditor().size());
 		sciencePaper.setEditor(field.getSecEditor().get(rnd));
-
+		sciencePaperData.replace("goodFormatted", "yes");
 		sciencePaperService.save(sciencePaper);
 
 		sciencePaperData.replace("sciencePaperId", sciencePaper.getId());
@@ -298,17 +319,29 @@ public class SciencePaperController {
 
 		return new ResponseEntity<SciencePaper>(sciencePaper, HttpStatus.OK);
 	}
+	@RequestMapping(
+			value = "magazine-reviewers/{magazineId}",
+			method = RequestMethod.GET
+	)
+	public ResponseEntity<List<User>>getPossibleReviewers(@PathVariable String magazineId){
+		return new ResponseEntity<List<User>>(magazineService.findById(Long.parseLong(magazineId)).getReviewers(), HttpStatus.OK);
+	}
 
 //kada zavrsi dodavanje recenzenata potvrdjuje
     @RequestMapping(
-            value="/confirmAddReviwer",
-            method = RequestMethod.GET
+            value="/confirm-reviwers/{paperId}",
+            method = RequestMethod.POST
     )
-    public ResponseEntity<List<SciencePaper>> confirmAddReviwer(@ModelAttribute("currentUser") CurrentUser currentUser){
+    public ResponseEntity<List<User>> confirmAddReviwer(@RequestBody ArrayList<User> listOfReviewers, @PathVariable String paperId){
         Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list().get(0);
 
-        //TODO
-
+        SciencePaper paper = sciencePaperService.findById(Long.parseLong(paperId));
+        for(User reviewer: listOfReviewers){
+        	Comment comment = new Comment(reviewer, paper,"");
+        	commentService.save(comment);
+		}
+        paper.setStatus("reviewers_looking");
+		sciencePaperService.save(paper);
 
         System.out.println("\n updatedSciencePaper controller");
         sciencePaperData.replace("addMoreReviewer", "no");//uci ce u kontroler tek kada se pritisne dugme a proces ConfirmAddReviwerSciencePaperService ce se pokretati svaki put posle dodavanja
@@ -316,10 +349,127 @@ public class SciencePaperController {
         runtimeService.setVariable(processInstanceId, "sciencePaperData", sciencePaperData);
         formService.submitTaskForm(task.getId(), sciencePaperData);
 
-        return new ResponseEntity<List<SciencePaper>>( HttpStatus.OK);
+        return new ResponseEntity<List<User>>( HttpStatus.OK);
     }
+	@RequestMapping(
+			value="/add-review/{paperId}",
+			method = RequestMethod.POST
+	)
+    public ResponseEntity<SciencePaper> addReview(@RequestBody ReviewDataDTO reviewData, @PathVariable String paperId, @ModelAttribute("currentUser") CurrentUser currentUser){
+		Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list().get(0);
+
+		SciencePaper paper = sciencePaperService.findById(Long.parseLong(paperId));
+		User reviewer = currentUser.getUser();
+
+		for(Comment comment: paper.getComments()){
+			if(comment.getUser().getId().equals(reviewer.getId())){
+				comment.setContent(reviewData.getTextContent());
+				comment.setRecommendation(reviewData.getRecommendation());
+				comment.setFinished(true);
+			}
+		}
+		int flag = 0;
+		for(Comment comment: paper.getComments()){
+			if(!comment.getFinished()){
+				flag =1;// nije zavrsen barem jedan
+			}
+		}
+		if(flag == 0){
+			paper.setStatus("sec_editor_decide");
+		}
+
+		sciencePaperService.save(paper);
+		String processInstanceId = task.getProcessInstanceId();
+		runtimeService.setVariable(processInstanceId, "sciencePaperData", sciencePaperData);
+		formService.submitTaskForm(task.getId(), sciencePaperData);
+		return new ResponseEntity<SciencePaper>(paper, HttpStatus.OK);
+	}
+// odluka urednika ako je rad prihvacen 17. tacka
+	@RequestMapping(
+			value="/final-decision/{paperId}/{decision}",
+			method = RequestMethod.GET
+	)
+	public ResponseEntity<List<SciencePaper>> finalDecision(@PathVariable String paperId, @PathVariable String decision,@ModelAttribute("currentUser") CurrentUser currentUser){
+		Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list().get(0);
+		SciencePaper paper = sciencePaperService.findById(Long.parseLong(paperId));
+		User user = currentUser.getUser();
+
+		//TODO rad je odobren moze biti poslat na vecu doradu i na manju doradu
+
+		System.out.println("\n finalDecision controller");
+
+		if(decision.equals("approve")){//TODO Ako je prihvacen
+			sciencePaperData.replace("finalDecision", "yes");
+			sciencePaperData.replace("smallChange", "no");
+			sciencePaperData.replace("bigChange", "no");
+			sciencePaperData.replace("secDiscard", "no");
+			paper.setApproved(true);
+			paper.setStatus("approved");
+		}else if(decision.equals("small")){ //TODO ako je manja izmena
+			paper.setStatus("small_mistake");
+			sciencePaperData.replace("secDiscard", "no");
+			sciencePaperData.replace("smallChange", "yes");
+			sciencePaperData.replace("finalDecision", "no");
+			sciencePaperData.replace("bigChange", "no");
+		}else if(decision.equals("big")){ //TODO ako ej velika izmena
+			sciencePaperData.replace("secDiscard", "no");
+			sciencePaperData.replace("smallChange", "no");
+			sciencePaperData.replace("finalDecision", "no");
+			sciencePaperData.replace("bigChange", "yes");
+			paper.setStatus("sec_editor_rev");
+			for (Comment com: paper.getComments()
+				 ) {
+				commentService.delete(com.getId());
+			}
+
+			paper.setComments(new ArrayList<>());
+			sciencePaperService.save(paper);
+		}else{//TODO ko je odbijen
+			sciencePaperData.replace("smallChange", "no");
+			sciencePaperData.replace("finalDecision", "no");
+			sciencePaperData.replace("bigChange", "no");
+			sciencePaperData.replace("secDiscard", "yes");
 
 
+		}
 
 
+		String processInstanceId = task.getProcessInstanceId();
+		runtimeService.setVariable(processInstanceId, "sciencePaperData", sciencePaperData);
+		formService.submitTaskForm(task.getId(), sciencePaperData);
+
+		return new ResponseEntity<List<SciencePaper>>( HttpStatus.OK);
+	}
+// Prihvata, odbija ili dorada
+	@RequestMapping(
+			value="/small-mistake/{paperId}/{decision}",
+			method = RequestMethod.GET
+	)
+	public ResponseEntity<List<SciencePaper>> smallMistake(@PathVariable String paperId, @PathVariable String decision,@ModelAttribute("currentUser") CurrentUser currentUser){
+		Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list().get(0);
+		SciencePaper paper = sciencePaperService.findById(Long.parseLong(paperId));
+		User user = currentUser.getUser();
+
+		//TODO
+		System.out.println("\n moreChangeOrAccept controller");
+		if(decision.equals("approve")) {// TODO ako prihvata rad
+			sciencePaperData.replace("moreChange", "no");
+			sciencePaperData.replace("lastDicard", "no");
+			paper.setApproved(true);
+			paper.setStatus("approved");
+		}else if(decision.equals("small")){
+			//TODO ako treba jos dorada
+			paper.setStatus("small_mistake");
+			sciencePaperData.replace("moreChange", "yes");
+			sciencePaperData.replace("lastDicard", "no");
+		}else{//TODO ako je odbijen
+			sciencePaperData.replace("lastDicard", "yes");
+		}
+		//uci ce u kontroler tek kada se pritisne dugme a proces ConfirmAddReviwerSciencePaperService ce se pokretati svaki put posle dodavanja
+		String processInstanceId = task.getProcessInstanceId();
+		runtimeService.setVariable(processInstanceId, "sciencePaperData", sciencePaperData);
+		formService.submitTaskForm(task.getId(), sciencePaperData);
+
+		return new ResponseEntity<List<SciencePaper>>( HttpStatus.OK);
+	}
 }

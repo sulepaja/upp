@@ -30,12 +30,37 @@ public class Comment {
     @Column
     private String content;
 
+    @Column
+    Boolean finished;
+
+    @Column
+    String recommendation;
+
     public Comment () {}
 
     public Comment(User user, SciencePaper sciencePaper, String content) {
         this.user = user;
         this.sciencePaper = sciencePaper;
         this.content = content;
+        this.expired = false;
+        this.finished = false;
+        this.recommendation = "";
+    }
+
+    public Boolean getFinished() {
+        return finished;
+    }
+
+    public void setFinished(Boolean finished) {
+        this.finished = finished;
+    }
+
+    public String getRecommendation() {
+        return recommendation;
+    }
+
+    public void setRecommendation(String recommendation) {
+        this.recommendation = recommendation;
     }
 
     public String getContent() {

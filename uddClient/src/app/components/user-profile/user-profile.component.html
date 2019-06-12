@@ -1,73 +1,218 @@
 <app-header></app-header>
 
 <div *ngIf="loggedUser.role=='EDITOR'">
-  <table>
-    <thead>
-      <tr>
-        <th>Paper Name</th>
-        <th>Author</th>
-        <th>Co-authors</th>
-        <th>Keywords</th>
-        <th>Scientific field</th>
-        <th>Download</th>
-        <th>Rework</th>
-        <th>Approve</th>
-        <th>Discard</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let paper of sciencePapersMainEditor">
-        <td>{{paper.name}}</td>
-        <td>{{paper.author.firstname}} {{paper.author.lastname}}</td>
-        <td>{{paper.co_authors}}</td>
-        <td>{{paper.keywords}}</td>
-        <td>{{paper.nameScientifiField}}</td>
-        <td><button (click)="download(paper)">Download</button></td>
-        <td><button (click)="openReworkCommentPopUp(paper)">Rework</button></td>
-        <td><button (click)="approve(paper)">Approve</button></td>
-        <td><button (click)="deletePaper(paper)">Discard</button></td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Paper Name</th>
+          <th>Author</th>          
+          <th>Keywords</th>
+          <th>Scientific field</th>
+          <th>Download</th>
+          <th>Rework</th>
+          <th>Approve</th>
+          <th>Discard</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let paper of sciencePapersMainEditor">
+          <td>{{paper.name}}</td>
+          <td>{{paper.author.firstname}} {{paper.author.lastname}}</td>          
+          <td>{{paper.keywords}}</td>
+          <td>{{paper.nameScientifiField}}</td>
+          <td><button mat-stroked-button (click)="download(paper)">Download</button></td>
+          <td><button mat-stroked-button (click)="openReworkCommentPopUp(paper)">Rework</button></td>
+          <td><button mat-stroked-button (click)="approve(paper)">Approve</button></td>
+          <td><button mat-stroked-button (click)="deletePaper(paper)">Discard</button></td>
+          <!--<button  mat-stroked-button (click) = "buyAccess(magazine)">Buy Access</button>-->
+        </tr>
+      </tbody>
+    </table>
+  </div>
   <div class="pop-up-style" *ngIf="showPopUpComment">
     <div class="pop-up-inner">
       <div class="pop-up-top">
-          <h5>Enter comment for author</h5>
-          <button (click)="togglePopUpVisibility()" class="x-button">X</button>
+          <h5>Enter comment for author</h5>          
       </div>
+      <div>        
+        <textarea style="width:100%;" [(ngModel)]="commentValue"></textarea>        
+      </div>      
       <div>
-        <textarea [(ngModel)]="commentValue"></textarea>
-      </div>
-      <div>
-        <button (click)="togglePopUpVisibility()">Cancel</button>
-        <button (click)="sendComment()">Send</button>
+        <button style="margin-right:10px;"mat-stroked-button (click)="togglePopUpVisibility()">Cancel</button>
+        <button mat-stroked-button (click)="sendComment()">Send</button>
       </div>
     </div>
   </div>
 </div>
 
 <div *ngIf="loggedUser.role=='USER'">
-  <div>    
+  <div class="user-container">
     <div *ngFor="let paper of sciencePapersUser">
-      <h3>Paper name: {{paper.name}}</h3>
-      <p>Abstract: {{paper.abbstract}}</p>
-      <p>Messages:</p>
-      <div *ngFor="let message of paper.comments">
-        <p>{{message.content}}</p>
-      </div>
+      <h4>Paper name: {{paper.name}}</h4>
+      <p>Abstract: {{paper.abbstract}}</p>      
+      <mat-accordion>
+          <mat-expansion-panel>
+              <mat-expansion-panel-header>Messages</mat-expansion-panel-header>
+              <mat-list>
+                  <mat-list-item *ngFor="let message of paper.comments">
+                    <p>{{message.content}}</p>
+                  </mat-list-item>
+              </mat-list>
+          </mat-expansion-panel>
+      </mat-accordion>            
       <div class="upload-btn-wrapper" style="margin-top:30px;">
           <button class="btn">Upload</button>
           <input type="file" (change)="selectFile($event)" name="myfile" />
       </div>
       <div>
-        <button (click)="uploadPaper(paper)">Submit</button>
+        <button mat-stroked-button (click)="uploadPaper(paper)">Submit</button>
       </div>
-    </div>    
+    </div>
   </div>
 </div>
 
 <div *ngIf="loggedUser.role=='SECEDITOR'">
-  <div *ngFor="let paper of secondEditorSiencePapers">
-    <p>AAAAAAAAAAAAAAAAAAAA USAO SAM</p>
+  <div class="user-container">
+    <h4>Unreviewed Science Papers</h4>
+    <div *ngFor="let paper of secondEditorSiencePapers">
+      <div *ngIf="paper.status == 'sec_editor_rev'">
+        <h5>Name: {{paper.name}}</h5>
+        <p>Author: {{paper.author.firstname}} {{paper.author.lastname}}</p>
+        <p>Abstract: {{paper.abbstract}}</p>
+        <p>Keywords: {{paper.keywords}}</p>
+        <button mat-stroked-button (click)="download(paper)">Download</button>
+        <button mat-stroked-button (click)="openChoseReviewersPopUp(paper)">Choose Reviewers</button>
+      </div>
+    </div>
+  </div>
+  <br/>
+  <div class="user-container">
+    <h4>Reviewed Science Papers</h4>
+    <div *ngFor="let paper of secondEditorSiencePapers">
+      <div *ngIf="paper.status == 'sec_editor_decide'">
+        <h5>Name: {{paper.name}}</h5>
+        <p>Author: {{paper.author.firstname}} {{paper.author.lastname}}</p>
+        <p>Abstract: {{paper.abbstract}}</p>
+        <p>Keywords: {{paper.keywords}}</p>
+        <mat-accordion>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>Comments</mat-expansion-panel-header>
+            <mat-list>
+              <mat-list-item *ngFor="let comment of paper.comments">
+                <h5>Author ID: {{comment.user}}</h5>
+                <p>Recommendation: {{comment.recommendation}}</p>
+                <p>{{comment.content}}</p>
+              </mat-list-item>
+            </mat-list>
+          </mat-expansion-panel>
+        </mat-accordion>
+        <br/><br/>
+        <button mat-stroked-button (click)="download(paper)">Download</button>
+        <button mat-stroked-button (click)="editorDecision(paper,'big')">Big mistake</button>
+        <button mat-stroked-button (click)="editorDecision(paper,'small')">Small mistake</button>
+        <button mat-stroked-button (click)="editorDecision(paper,'approve')">Approve</button>
+        <button mat-stroked-button (click)="editorDecision(paper,'discard')">Discard</button>
+        <!-- <p>Comment:</p>
+        <div *ngFor="let com of paper.comments">
+          <p>Content: {{com.content}}</p>
+        </div> -->
+      </div>
+    </div>
+  </div>
+  <div class="user-container">
+    <h4>Science paper with small mistake:</h4>
+    <div *ngFor="let paper of secondEditorSiencePapers">
+      <div *ngIf="paper.status == 'small_mistake_resolve'">
+        <h5>Name: {{paper.name}}</h5>
+        <p>Author: {{paper.author.firstname}} {{paper.author.lastname}}</p>
+        <p>Abstract: {{paper.abbstract}}</p>
+        <p>Keywords: {{paper.keywords}}</p>
+        <mat-accordion>
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>Comments</mat-expansion-panel-header>
+              <mat-list>
+                <mat-list-item *ngFor="let comment of paper.comments">
+                  <h5>Author ID: {{comment.user}}</h5>
+                  <p>Recommendation: {{comment.recommendation}}</p>
+                  <p>{{comment.content}}</p>
+                </mat-list-item>
+              </mat-list>
+            </mat-expansion-panel>
+          </mat-accordion>
+          <br/><br/>
+        <button mat-stroked-button (click)="download(paper)">Download</button>
+        <button mat-stroked-button (click)="editorDecisionSmallMistake(paper,'small')">Small mistake</button>
+        <button mat-stroked-button (click)="editorDecisionSmallMistake(paper,'approve')">Approve</button>
+        <button mat-stroked-button (click)="editorDecisionSmallMistake(paper,'discard')">Discard</button>        
+      </div>
+    </div>
+  </div>
+
+  <div class="pop-up-style" *ngIf="showPopUpComment">
+    <div class="pop-up-inner">
+      <div class="pop-up-top">
+        <h4>Choose reviewers</h4>        
+      </div>
+      <div>
+        <select [(ngModel)]="optionReviewer">
+          <option *ngFor="let reviewer of reviewers">
+            {{reviewer.username}}
+          </option>
+        </select>
+        <button mat-stroked-button (click)="addReviewer()">Add</button>
+      </div>
+      <div>
+        <h5>Selected reviewers:</h5>
+        <div *ngFor="let reviewer of selectedReviewers">
+          <label>{{reviewer.username}}</label>
+          <button class="x-select-button" (click)="removeReviewer(reviewer)">x</button>
+        </div>
+      </div>
+      <div>
+        <button mat-stroked-button (click)="togglePopUpVisibility()">Cancel</button>
+        <button mat-stroked-button [disabled]="confirmDisabled" (click)="confirmReviewers()">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="loggedUser.role=='REVIEWER'">
+  <div class="user-container">
+    <h4>Unreviewed Science Papers</h4>
+    <div *ngFor="let paper of reviewerSciencePapers">
+      <div *ngIf="paper.status == 'reviewers_looking'">
+        <h5>Name: {{paper.name}}</h5>
+        <p>Author: {{paper.author.firstname}} {{paper.author.lastname}}</p>
+        <p>Abstract: {{paper.abbstract}}</p>
+        <p>Keywords: {{paper.keywords}}</p>
+        <button mat-stroked-button (click)="download(paper)">Download</button>
+        <button mat-stroked-button (click)="openAddReviewersPopUp(paper)">Add Review</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pop-up-style" *ngIf="showPopUpComment">
+    <div class="pop-up-inner">
+      <div class="pop-up-top">
+        <h5>Enter comment for author</h5>        
+      </div>
+      <div>
+        <textarea style="width:100%;" [(ngModel)]="commentValue"></textarea>
+      </div>
+      <div>
+        <label>Choose recomendation</label><br/>
+        <select [(ngModel)]="reviewOption">
+          <option>Accept</option>
+          <option>Accept with small changes</option>
+          <option>Accept with larger changes</option>
+          <option>Reject</option>
+        </select>
+      </div>
+      <div style="margin-top:20px;">
+        <button mat-stroked-button (click)="togglePopUpVisibility()">Cancel</button>
+        <button mat-stroked-button (click)="sendReview()">Send</button>
+      </div>
+    </div>
   </div>
 </div>

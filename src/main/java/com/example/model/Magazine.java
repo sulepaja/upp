@@ -50,6 +50,9 @@ public class Magazine {
 	@ManyToMany(fetch =FetchType.EAGER, mappedBy = "allowedMagazines")
     private List<User> allowedUsers = new ArrayList<>();
 
+	@OneToMany(mappedBy = "reviewerMagazine", cascade = CascadeType.ALL)
+	private List<User> reviewers = new ArrayList<User>();
+
 	public Magazine(String issn, String name, double price) {
 		super();
 		this.issn = issn;
@@ -58,9 +61,15 @@ public class Magazine {
 	}
 
 	public Magazine(){}
-	
-	
-	
+
+	public List<User> getReviewers() {
+		return reviewers;
+	}
+
+	public void setReviewers(List<User> reviewers) {
+		this.reviewers = reviewers;
+	}
+
 	public List<User> getAllowedUsers() {
 		return allowedUsers;
 	}
